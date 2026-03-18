@@ -68,6 +68,15 @@ const AttendancePage = () => {
         >
           Mark Attendance
         </button>
+        {mutation.isError && (
+          <div className="text-red-500">
+            {mutation.error?.response?.data?.non_field_errors?.[0] ||
+              "Attendance already marked"}
+          </div>
+        )}
+        {mutation.isSuccess && (
+          <div className="text-green-600">Attendance marked successfully</div>
+        )}
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow">
