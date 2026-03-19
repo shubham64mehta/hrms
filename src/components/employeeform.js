@@ -79,87 +79,79 @@ const EmployeeForm = ({ onAdd, loading, error }) => {
 
     try {
       await onAdd(trimmed);
-    } catch {
-      // Error is handled by the mutation's onError (notification),
-      // so we just prevent the promise rejection from bubbling into React.
-    }
+    } catch {}
   };
 
   return (
     <form
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        onSubmit={handleSubmit}
-      >
-        <div className="space-y-1">
-          <input
-            className={`input ${
-              fieldErrors.employee_id ? "border-red-500 bg-red-50" : ""
-            }`}
-            placeholder="Employee ID"
-            aria-invalid={fieldErrors.employee_id ? "true" : "false"}
-            onChange={(e) => handleChange("employee_id", e.target.value)}
-          />
-          {fieldErrors.employee_id && (
-            <p className="text-xs text-red-600">{fieldErrors.employee_id}</p>
-          )}
-        </div>
+      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      onSubmit={handleSubmit}
+    >
+      <div className="space-y-1">
+        <input
+          className={`input ${
+            fieldErrors.employee_id ? "border-red-500 bg-red-50" : ""
+          }`}
+          placeholder="Employee ID"
+          aria-invalid={fieldErrors.employee_id ? "true" : "false"}
+          onChange={(e) => handleChange("employee_id", e.target.value)}
+        />
+        {fieldErrors.employee_id && (
+          <p className="text-xs text-red-600">{fieldErrors.employee_id}</p>
+        )}
+      </div>
 
-        <div className="space-y-1">
-          <input
-            className={`input ${fieldErrors.name ? "border-red-500 bg-red-50" : ""}`}
-            placeholder="Full Name"
-            aria-invalid={fieldErrors.name ? "true" : "false"}
-            onChange={(e) => handleChange("name", e.target.value)}
-          />
-          {fieldErrors.name && (
-            <p className="text-xs text-red-600">{fieldErrors.name}</p>
-          )}
-        </div>
+      <div className="space-y-1">
+        <input
+          className={`input ${fieldErrors.name ? "border-red-500 bg-red-50" : ""}`}
+          placeholder="Full Name"
+          aria-invalid={fieldErrors.name ? "true" : "false"}
+          onChange={(e) => handleChange("name", e.target.value)}
+        />
+        {fieldErrors.name && (
+          <p className="text-xs text-red-600">{fieldErrors.name}</p>
+        )}
+      </div>
 
-        <div className="space-y-1">
-          <input
-            className={`input ${fieldErrors.email ? "border-red-500 bg-red-50" : ""}`}
-            placeholder="Email"
-            type="email"
-            aria-invalid={fieldErrors.email ? "true" : "false"}
-            onChange={(e) => handleChange("email", e.target.value)}
-          />
-          {fieldErrors.email && (
-            <p className="text-xs text-red-600">{fieldErrors.email}</p>
-          )}
-        </div>
+      <div className="space-y-1">
+        <input
+          className={`input ${fieldErrors.email ? "border-red-500 bg-red-50" : ""}`}
+          placeholder="Email"
+          type="email"
+          aria-invalid={fieldErrors.email ? "true" : "false"}
+          onChange={(e) => handleChange("email", e.target.value)}
+        />
+        {fieldErrors.email && (
+          <p className="text-xs text-red-600">{fieldErrors.email}</p>
+        )}
+      </div>
 
-        <div className="space-y-1">
-          <input
-            className={`input ${
-              fieldErrors.department ? "border-red-500 bg-red-50" : ""
-            }`}
-            placeholder="Department"
-            aria-invalid={fieldErrors.department ? "true" : "false"}
-            onChange={(e) => handleChange("department", e.target.value)}
-          />
-          {fieldErrors.department && (
-            <p className="text-xs text-red-600">
-              {fieldErrors.department}
-            </p>
-          )}
-        </div>
+      <div className="space-y-1">
+        <input
+          className={`input ${
+            fieldErrors.department ? "border-red-500 bg-red-50" : ""
+          }`}
+          placeholder="Department"
+          aria-invalid={fieldErrors.department ? "true" : "false"}
+          onChange={(e) => handleChange("department", e.target.value)}
+        />
+        {fieldErrors.department && (
+          <p className="text-xs text-red-600">{fieldErrors.department}</p>
+        )}
+      </div>
 
-        <button
-          disabled={loading}
-          className="col-span-full btn-primary mt-2"
-        >
-          {loading ? (
-            <span className="inline-flex items-center gap-2">
-              <Loader size="sm" />
-              <span>Adding employee...</span>
-            </span>
-          ) : (
-            "Add Employee"
-          )}
-        </button>
-      </form>
+      <button disabled={loading} className="col-span-full btn-primary mt-2">
+        {loading ? (
+          <span className="inline-flex items-center gap-2">
+            <Loader size="sm" />
+            <span>Adding employee...</span>
+          </span>
+        ) : (
+          "Add Employee"
+        )}
+      </button>
+    </form>
   );
-}
+};
 
 export default EmployeeForm;
