@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNotification } from "./notification";
+import Loader from "./loader";
 
-const EmployeeForm = ({ onAdd }) => {
+const EmployeeForm = ({ onAdd, loading, error }) => {
   const [form, setForm] = useState({
     employee_id: "",
     name: "",
@@ -8,47 +10,131 @@ const EmployeeForm = ({ onAdd }) => {
     department: "",
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.employee_id || !form.name || !form.email || !form.department) {
-      return alert("All fields are required");
+  const [fieldErrors, setFieldErrors] = useState({
+    employee_id: "",
+    name: "",
+    email: "",
+    department: "",
+  });
+
+  const { notify } = useNotification();
+
+  const validateField = (name, value) => {
+    const trimmed = value.trim();
+
+    if (!trimmed) {
+      return "This field is required.";
     }
-    // console.log(form);
-    onAdd(form);
+
+    if (name === "employee_id" && !/^\d+$/.test(trimmed)) {
+      return "Employee ID must contain digits only.";
+    }
+
+    if (name === "email") {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(trimmed)) {
+        return "Please enter a valid email address.";
+      }
+    }
+
+    return "";
+  };
+
+  const handleChange = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+
+    const errorMsg = validateField(name, value);
+    setFieldErrors((prev) => ({ ...prev, [name]: errorMsg }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const trimmed = {
+      employee_id: form.employee_id?.trim(),
+      name: form.name?.trim(),
+      email: form.email?.trim(),
+      department: form.department?.trim(),
+    };
+
+    const nextFieldErrors = {
+      employee_id: validateField("employee_id", form.employee_id),
+      name: validateField("name", form.name),
+      email: validateField("email", form.email),
+      department: validateField("department", form.department),
+    };
+
+    setFieldErrors(nextFieldErrors);
+
+    const hasError = Object.values(nextFieldErrors).some(Boolean);
+
+    if (hasError) {
+      notify({
+        type: "error",
+        title: "Please fix the highlighted fields",
+        message: "Some values are invalid or missing.",
+      });
+      return;
+    }
+
+    try {
+      await onAdd(trimmed);
+    } catch {
+      // Error is handled by the mutation's onError (notification),
+      // so we just prevent the promise rejection from bubbling into React.
+    }
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow">
-      <h2 className="text-lg font-semibold mb-4">Add Employee</h2>
-
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+    <form
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        onSubmit={handleSubmit}
+      >
         <input
+          className={`input ${
+            fieldErrors.employee_id ? "border-red-500 bg-red-50" : ""
+          }`}
           placeholder="Employee ID"
-          className="input"
-          onChange={(e) => setForm({ ...form, employee_id: e.target.value })}
+          onChange={(e) => handleChange("employee_id", e.target.value)}
         />
         <input
+          className={`input ${
+            fieldErrors.name ? "border-red-500 bg-red-50" : ""
+          }`}
           placeholder="Full Name"
-          className="input"
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          onChange={(e) => handleChange("name", e.target.value)}
         />
         <input
+          className={`input ${
+            fieldErrors.email ? "border-red-500 bg-red-50" : ""
+          }`}
           placeholder="Email"
-          className="input"
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          type="email"
+          onChange={(e) => handleChange("email", e.target.value)}
         />
         <input
+          className={`input ${
+            fieldErrors.department ? "border-red-500 bg-red-50" : ""
+          }`}
           placeholder="Department"
-          className="input"
-          onChange={(e) => setForm({ ...form, department: e.target.value })}
+          onChange={(e) => handleChange("department", e.target.value)}
         />
 
-        <button className="col-span-2 bg-black text-white py-2 rounded-lg">
-          Add Employee
+        <button
+          disabled={loading}
+          className="col-span-full btn-primary mt-2"
+        >
+          {loading ? (
+            <span className="inline-flex items-center gap-2">
+              <Loader size="sm" />
+              <span>Adding employee...</span>
+            </span>
+          ) : (
+            "Add Employee"
+          )}
         </button>
       </form>
-    </div>
   );
-};
+}
 
 export default EmployeeForm;

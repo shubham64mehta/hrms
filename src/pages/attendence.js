@@ -1,98 +1,197 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { getEmployees } from "../service/employee";
 import { getAttendance, markAttendance } from "../service/attendance";
+import { getErrorMessage } from "../utils/errormessage";
+import { useNotification } from "../components/notification";
+import Loader from "../components/loader";
+import SectionCard from "../components/sectioncard";
+import PageHeader from "../components/pageheader";
 
-const AttendancePage = () => {
+export default function AttendancePage() {
   const queryClient = useQueryClient();
-
   const [employeeId, setEmployeeId] = useState("");
   const [status, setStatus] = useState("Present");
+  const { notify } = useNotification();
 
-  // Fetch employees from the API
-  const { data: employees = [] } = useQuery({
+  const {
+    data: employees = [],
+    isLoading: employeesLoading,
+    isError: employeesError,
+    error: employeesErrorObj,
+  } = useQuery({
     queryKey: ["employees"],
     queryFn: getEmployees,
   });
 
-  // Fetch attendance from the API
-  const { data: attendance = [] } = useQuery({
+  const {
+    data: attendance = [],
+    isLoading: attendanceLoading,
+    isError: attendanceError,
+    error: attendanceErrorObj,
+  } = useQuery({
     queryKey: ["attendance", employeeId],
     queryFn: () => getAttendance(employeeId),
     enabled: !!employeeId,
   });
 
-  // Mutation to mark attendance
   const mutation = useMutation({
     mutationFn: markAttendance,
     onSuccess: () => {
       queryClient.invalidateQueries(["attendance", employeeId]);
+      notify({
+        type: "success",
+        title: "Attendance marked",
+        message: "Attendance has been recorded for today.",
+      });
+    },
+    onError: (error) => {
+      notify({
+        type: "error",
+        title: "Failed to mark attendance",
+        message: getErrorMessage(error),
+      });
     },
   });
 
-  const handleMark = () => {
-    if (!employeeId) return alert("Select employee");
-
-    mutation.mutate({
-      employee: employeeId,
-      date: new Date().toISOString().split("T")[0],
-      status: status,
-    });
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-xl shadow space-y-4">
-        <h2 className="font-semibold">Mark Attendance</h2>
+    <div className="space-y-8">
+      <PageHeader
+        title="Attendance"
+        subtitle="Mark daily presence and review an employee's attendance history."
+      />
 
-        <select
-          className="input"
-          onChange={(e) => setEmployeeId(e.target.value)}
-        >
-          <option value="">Select Employee</option>
-          {employees.map((emp) => (
-            <option key={emp.id} value={emp.id}>
-              {emp.name}
-            </option>
+      <SectionCard
+        title="Mark Attendance"
+        description="Choose an employee and set their status for today."
+      >
+        <div className="space-y-3">
+          {employeesLoading && (
+            <div className="inline-flex items-center gap-2 text-gray-500 text-sm">
+              <Loader size="sm" />
+              <span>Loading employees...</span>
+            </div>
+          )}
+
+          {employeesError && (
+            <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {getErrorMessage(employeesErrorObj)}
+            </div>
+          )}
+
+          <select
+            className="input"
+            value={employeeId}
+            onChange={(e) => setEmployeeId(e.target.value)}
+          >
+            <option value="">Select Employee</option>
+            {employees.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.name}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-600">Status:</span>
+            <div className="inline-flex rounded-full border border-gray-200 bg-gray-50 p-1">
+              <button
+                type="button"
+                className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                  status === "Present"
+                    ? "bg-emerald-500 text-white shadow-sm"
+                    : "text-gray-600 hover:bg-white"
+                }`}
+                onClick={() => setStatus("Present")}
+              >
+                Present
+              </button>
+              <button
+                type="button"
+                className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                  status === "Absent"
+                    ? "bg-red-500 text-white shadow-sm"
+                    : "text-gray-600 hover:bg-white"
+                }`}
+                onClick={() => setStatus("Absent")}
+              >
+                Absent
+              </button>
+            </div>
+          </div>
+
+          <button
+            className="w-full btn-primary"
+            disabled={mutation.isLoading || !employeeId}
+            onClick={() =>
+              mutation.mutate({
+                employee: employeeId,
+                date: new Date().toISOString().split("T")[0],
+                status,
+              })
+            }>
+            {mutation.isLoading ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader size="sm" />
+                <span>Marking...</span>
+              </span>
+            ) : (
+              `Mark ${status}`
+            )}
+          </button>
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Attendance Records"
+        description="Recent attendance entries for the selected employee."
+      >
+        {attendanceLoading && (
+          <div className="inline-flex items-center gap-2 text-gray-500 text-sm">
+            <Loader size="sm" />
+            <span>Loading attendance...</span>
+          </div>
+        )}
+
+        {attendanceError && (
+          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {getErrorMessage(attendanceErrorObj)}
+          </div>
+        )}
+
+        {!attendanceLoading && !attendance.length && employeeId && (
+          <p className="text-gray-500 text-center py-4">
+            No records found for this employee.
+          </p>
+        )}
+
+        {!employeeId && (
+          <p className="text-gray-500 text-center py-4 text-sm">
+            Select an employee above to view their attendance records.
+          </p>
+        )}
+
+        <div className="space-y-3">
+          {attendance.map((a) => (
+            <div
+              key={a.id}
+              className="flex justify-between items-center border rounded-lg px-4 py-3"
+            >
+              <span className="text-gray-600">{a.date}</span>
+
+              <span
+                className={`font-medium ${
+                  a.status === "Present"
+                    ? "text-green-600"
+                    : "text-red-500"
+                }`}
+              >
+                {a.status}
+              </span>
+            </div>
           ))}
-        </select>
-        <select className="input" onChange={(e) => setStatus(e.target.value)}>
-          <option value="Present">Present</option>
-          <option value="Absent">Absent</option>
-        </select>
-
-        <button
-          className="bg-black text-white px-4 py-2 rounded"
-          onClick={handleMark}
-        >
-          Mark Attendance
-        </button>
-        {mutation.isError && (
-          <div className="text-red-500">
-            {mutation.error?.response?.data?.non_field_errors?.[0] ||
-              "Attendance already marked"}
-          </div>
-        )}
-        {mutation.isSuccess && (
-          <div className="text-green-600">Attendance marked successfully</div>
-        )}
-      </div>
-
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="font-semibold mb-4">Attendance Records</h2>
-
-        {!attendance.length && <p>No records found</p>}
-
-        {attendance.map((a) => (
-          <div key={a.id} className="flex justify-between border-b py-2">
-            <span>{a.date}</span>
-            <span>{a.status}</span>
-          </div>
-        ))}
-      </div>
+        </div>
+      </SectionCard>
     </div>
   );
-};
-
-export default AttendancePage;
+}
