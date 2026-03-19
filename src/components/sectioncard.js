@@ -1,23 +1,21 @@
-const SectionCard = ({ title, description, children, footer, fullWidth = false }) => {
+const SectionCard = ({ title, description, children, footer }) => {
   return (
     <section
-      className={`bg-white rounded-2xl border shadow-sm ${
-        fullWidth ? "" : ""
-      }`}
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm"
     >
       <div className="p-6 space-y-4">
         {(title || description) && (
           <header className="space-y-1">
-            {title && <h3 className="text-lg font-medium">{title}</h3>}
+            {title && <h3 className="text-lg font-semibold tracking-tight">{title}</h3>}
             {description && (
-              <p className="text-xs text-gray-500">{description}</p>
+              <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
             )}
           </header>
         )}
 
-        <div>{children}</div>
+        {children}
 
-        {footer && <footer>{footer}</footer>}
+        {footer && <footer className="pt-2">{footer}</footer>}
       </div>
     </section>
   );

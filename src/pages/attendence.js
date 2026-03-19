@@ -97,10 +97,10 @@ export default function AttendancePage() {
             <div className="inline-flex rounded-full border border-gray-200 bg-gray-50 p-1">
               <button
                 type="button"
-                className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                className={`btn-chip ${
                   status === "Present"
-                    ? "bg-emerald-500 text-white shadow-sm"
-                    : "text-gray-600 hover:bg-white"
+                    ? "btn-chip-active-present"
+                    : "btn-chip-inactive"
                 }`}
                 onClick={() => setStatus("Present")}
               >
@@ -108,10 +108,10 @@ export default function AttendancePage() {
               </button>
               <button
                 type="button"
-                className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                className={`btn-chip ${
                   status === "Absent"
-                    ? "bg-red-500 text-white shadow-sm"
-                    : "text-gray-600 hover:bg-white"
+                    ? "btn-chip-active-absent"
+                    : "btn-chip-inactive"
                 }`}
                 onClick={() => setStatus("Absent")}
               >
@@ -175,15 +175,18 @@ export default function AttendancePage() {
           {attendance.map((a) => (
             <div
               key={a.id}
-              className="flex justify-between items-center border rounded-lg px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm"
             >
-              <span className="text-gray-600">{a.date}</span>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900">{a.date}</p>
+                <p className="text-xs text-gray-500">Recorded status</p>
+              </div>
 
               <span
-                className={`font-medium ${
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
                   a.status === "Present"
-                    ? "text-green-600"
-                    : "text-red-500"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
                 }`}
               >
                 {a.status}

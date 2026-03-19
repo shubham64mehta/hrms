@@ -2,9 +2,11 @@ const PageHeader = ({ title, subtitle, actions }) => {
   return (
     <div className="flex items-center justify-between gap-3 flex-wrap">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+        <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
+          {title}
+        </h2>
         {subtitle && (
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-gray-500 mt-0.5 leading-relaxed">
             {subtitle}
           </p>
         )}

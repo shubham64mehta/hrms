@@ -4,7 +4,12 @@ const MainLayout = ({ children }) =>   {
   const { pathname } = useLocation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <div
+      className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100
+        before:absolute before:inset-0
+        before:bg-[radial-gradient(ellipse_at_top,rgba(15,23,42,0.07),transparent_55%),radial-gradient(ellipse_at_bottom,rgba(2,132,199,0.05),transparent_60%)]
+        before:pointer-events-none before:content-['']"
+    >
       <header className="bg-white/80 backdrop-blur border-b px-4 md:px-8 py-3 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
           <div>
@@ -16,26 +21,28 @@ const MainLayout = ({ children }) =>   {
             </p>
           </div>
 
-          <nav className="flex items-center gap-4 text-sm">
-          <Link
-            to="/"
-            className={`${
-              pathname === "/" ? "text-black font-medium" : "text-gray-500"
-            }`}
-          >
-            Employees
-          </Link>
+          <nav className="flex items-center gap-2 text-sm">
+            <Link
+              to="/"
+              className={`rounded-lg px-3 py-2 transition ${
+                pathname === "/"
+                  ? "bg-slate-900 text-white shadow-sm hover:bg-slate-800"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
+              }`}
+            >
+              Employees
+            </Link>
 
-          <Link
-            to="/attendance"
-            className={`${
-              pathname === "/attendance"
-                ? "text-black font-medium"
-                : "text-gray-500"
-            }`}
-          >
-            Attendance
-          </Link>
+            <Link
+              to="/attendance"
+              className={`rounded-lg px-3 py-2 transition ${
+                pathname === "/attendance"
+                  ? "bg-slate-900 text-white shadow-sm hover:bg-slate-800"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
+              }`}
+            >
+              Attendance
+            </Link>
           </nav>
         </div>
       </header>
